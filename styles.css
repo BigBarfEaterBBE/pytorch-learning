@@ -1,0 +1,13 @@
+body {
+    font-family: Arial;
+    text-align: center;
+    margin: 40px;
+}
+
+.controls {
+    margin-bottom: 20px;
+}
+
+label {
+    margin: 10px;
+}

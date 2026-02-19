@@ -3,8 +3,14 @@ const weightInput = document.getElementById("weight");
 const biasInput = document.getElementById("bias");
 const lrInput = document.getElementById("lr");
 const startBtn = document.getElementById("startBtn");
+const pauseBtn = document.getElementById("pauseBtn");
+const clearBtn = document.getElementById("clearBtn");
+const modelWDisplay = document.getElementById("modelW");
+const modelBDisplay = document.getElementById("modelB");
 
 let isTraining = false;
+let isPaused = false;
+let trainingTimeout;
 
 function generateData(idealW, idealB) {
     const xs = [];
@@ -29,8 +35,14 @@ function trainModel(xs, ys, epochs, lr, idealW, idealB) {
     let currentEpoch = 0;
 
     function step() {
+        if (!isTraining || isPaused) return; // stop if paused
         if (currentEpoch >= epochs) {
             isTraining = false;
+
+            epochsInput.disabled = false;
+            weightInput.disabled = false;
+            biasInput.disabled = false;
+            lrInput.disabled = false;
             return;
         }
 
@@ -62,9 +74,12 @@ function trainModel(xs, ys, epochs, lr, idealW, idealB) {
         lossChart.data.datasets[0].data.push(loss);
         lossChart.update();
 
+        modelWDisplay.textContent = w.toFixed(3);
+        modelBDisplay.textContent = b.toFixed(3);
+
         currentEpoch++;
 
-        setTimeout(step, 50); //50ms delay
+        setTimeout(step, 80); //50ms delay
 
         
     }
@@ -91,6 +106,25 @@ function updateChart(xs,ys,w,b,idealW,idealB) {
         y: idealW *x + idealB
     }));
 
+    chart.update();
+}
+
+function updateIdealLine() {
+    const idealW = parseFloat(weightInput.value);
+    const idealB = parseFloat(biasInput.value);
+
+    if (!currentXs.length) {
+        // generate x points if none existing
+        currentXs = Array.from({ length: 50 }, (_, i) => i /10);
+    }
+
+    // y values can be empty
+    const ys = currentYs.length ? currentYs: currentXs.map(x => idealW * x + idealB);
+
+    chart.data.datasets[2].data = currentXs.map(x => ({
+        x: x,
+        y: idealW * x + idealB
+    }));
     chart.update();
 }
 
@@ -166,7 +200,15 @@ const lossChart = new Chart(lossCtx, {
 
 startBtn.addEventListener("click", () => {
     if (isTraining) return; // prevent double start
+    
     isTraining = true;
+    isPaused = false;
+    pauseBtn.textContent = "Pause";
+
+    epochsInput.disabled = true;
+    weightInput.disabled = true;
+    biasInput.disabled = true;
+    lrInput.disabled = true;
     
     const epochs = parseInt(epochsInput.value);
     const idealW = parseFloat(weightInput.value);
@@ -174,6 +216,9 @@ startBtn.addEventListener("click", () => {
     const lr = parseFloat(lrInput.value);
 
     const {xs, ys} = generateData(idealW, idealB);
+
+    currentXs = xs;
+    currentYs = ys;
 
     chart.options.scales.y.min = idealB-5;
     chart.options.scales.y.max = idealW * 5 + idealB + 5;
@@ -185,3 +230,52 @@ startBtn.addEventListener("click", () => {
 
     trainModel(xs,ys,epochs,lr,idealW,idealB)
 });
+
+let currentXs = [];
+let currentYs = [];
+
+function remainingEpochs() {
+    return parseInt(epochsInput.value) - lossChart.data.labels.length;
+}
+
+pauseBtn.addEventListener("click", () => {
+    if (!isTraining) return;
+
+    isPaused = !isPaused;
+    pauseBtn.textContent = isPaused ? "Resume" : "Pause";
+
+    if (!isPaused) {
+        //resume
+        trainModel(currentXs, currentYs, remainingEpochs(), parseFloat(lrInput.value),
+                    parseFloat(weightInput.value), parseFloat(biasInput.value));
+    } else {
+        clearTimeout(trainingTimeout);
+    }
+});
+
+clearBtn.addEventListener("click", () => {
+    clearTimeout(trainingTimeout);
+    isTraining = false;
+    isPaused = false;
+    pauseBtn.textContent = "Pause";
+
+    epochsInput.disabled = false;
+    weightInput.disabled = false;
+    biasInput.disabled = false;
+    lrInput.disabled = false;
+
+    chart.data.datasets[0].data =[];
+    chart.data.datasets[1].data = [];
+    chart.data.datasets[2].data = [];
+    chart.update();
+
+    lossChart.data.labels = [];
+    lossChart.data.datasets[0].data =[];
+    lossChart.update();
+
+    modelWDisplay.textContent ="-";
+    modelBDisplay.textContent ="-";
+});
+
+weightInput.addEventListener("input", updateIdealLine);
+biasInput.addEventListener("input", updateIdealLine);

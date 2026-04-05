@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Image Augmentation Playground</title>
+        <link rel="stylesheet" href="styles.css">
+    </head>
+    <body>
+        <h1>Image Augmentation Playground</h1>
+
+        <input type="file" id="uploadImage" accept="image/*">
+        <img id="previewImage" style="display:none; width:200px; margin-top:10px;" />
+
+        <h2>Transformations</h2>
+        <div>
+            <label>
+                <input type="checkbox" id="flip">
+                Horizontal Flip
+            </label>
+        </div>
+        <div>
+            <label>
+                <input type="checkbox" id="rotateCheck">
+                Rotation (degrees):
+            </label>
+            <input type="range" id="rotation" min="0" max="90" value="30">
+            <span id="rotationValue">30</span>
+        </div>
+        <div>
+            <label>
+                <input type="checkbox" id="jitterCheck">
+                Color Jitter
+            </label>
+            <br>
+            Brightness: <input type="range" id="brightness" min="0" max="1" step="0.1" value="0.5">
+            Contrast: <input type="range" id="contrast" min="0" max="1" step="0.1" value="0.5">
+            Saturation: <input type="range" id="saturation" min="0" max="1" step="0.1" value="0.5">
+        </div>
+        <div>
+            <label>
+                <input type="checkbox" id="cropCheck">
+                Random Crop (scale):
+            </label>
+            <input type="range" id="cropScale" min="0.5" max="1" step="0.1" value="0.8">
+        </div>
+        <div>
+            <label>
+                <input type="checkbox" id="trivial">
+                TrivialAugmentWide
+            </label>
+        </div>
+
+        <br>
+        <button id="applyBtn">Apply</button>
+        <div id="augmentedSamples" style="display:flex; gap:10px; flex-wrap: wrap;"></div>
+
+        <script src="script_aug.js"></script>
+    </body>
+</html>

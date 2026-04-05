@@ -10,11 +10,11 @@ app = Flask(__name__)
 
 @app.route("/")
 def serve_html():
-    return send_from_directory("frontend", "augmentation.html")
+    return send_from_directory(".", "augmentation.html")
 
 @app.route("/<path:path>")
 def serve_static(path):
-    return send_from_directory("frontend", path)
+    return send_from_directory(".", path)
 
 @app.route("/augment", methods=["POST"])
 def augment_image():

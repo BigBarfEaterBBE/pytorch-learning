@@ -27,7 +27,7 @@ document.getElementById("applyBtn").addEventListener("click", async () => {
 
     formData.append("settings", JSON.stringify(settings));
 
-    const responses = await fetch("http://127.0.0.1:5000/augment", {
+    const responses = await fetch("/augment", {
         method: "POST",
         body: formData
     });
